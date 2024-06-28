@@ -1,45 +1,60 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// Function to find the next bigger number
-long long next_bigger_number(long long *n) {
-    long long num[100], i, j, s, t, k, l, tmp;
-    long long o = *n; // original number
+long long next_bigger_number(long long n) {
+    if (n < 0) {
+        return -1; // Return -1 for negative numbers
+    }
 
-    // Separate the number into digits
-    for (i = j = 100; o > 0;) {
-        num[--i] = o % 10;
+    // Count the number of digits
+    long long o = n;
+    long long length = 0;
+    while (o != 0) {
+        o = o / 10;
+        length++;
+    }
+
+    // Extract digits into an array
+    long long *num = (long long*) malloc(length * sizeof(long long));
+    if (num == NULL) {
+        return -1; // Memory allocation failed
+    }
+
+    o = n;
+    for (long long i = length - 1; i >= 0; i--) {
+        num[i] = o % 10;
         o = o / 10;
     }
 
-    // Find the first digit smaller than the next one to the right
-    for (s = j - 2; s >= i; s--) {
+    // Find the pivot
+    long long s;
+    for (s = length - 2; s >= 0; s--) {
         if (num[s] < num[s + 1]) {
             break;
         }
     }
 
-    if (s < i) {
-        // No bigger number with the same digits
-        return -1;
+    if (s < 0) {
+        free(num);
+        return -1; // No bigger number possible
     }
 
-    // Find the smallest digit to the right of 's' that is larger than 's'
-    t = s + 1;
-    for (k = t + 1; k < j; k++) {
-        if (num[k] < num[t] && num[k] > num[s]) {
+    // Find the smallest digit on right side of pivot which is larger than num[s]
+    long long t = s + 1;
+    for (long long k = s + 1; k < length; k++) {
+        if (num[k] > num[s] && num[k] <= num[t]) {
             t = k;
         }
     }
 
-    // Swap the two found digits
-    tmp = num[t];
-    num[t] = num[s];
-    num[s] = tmp;
+    // Swap the pivot and the smallest larger digit found
+    long long tmp = num[s];
+    num[s] = num[t];
+    num[t] = tmp;
 
-    // Sort the digits from position (s + 1) onwards in ascending order
-    for (k = s + 1; k < j - 1; k++) {
-        for (l = k + 1; l < j; l++) {
+    // Sort the digits after the pivot in ascending order
+    for (long long k = s + 1; k < length - 1; k++) {
+        for (long long l = k + 1; l < length; l++) {
             if (num[k] > num[l]) {
                 tmp = num[k];
                 num[k] = num[l];
@@ -48,29 +63,22 @@ long long next_bigger_number(long long *n) {
         }
     }
 
-    // Construct the resulting number from the sorted digits
-    long long juris = 0;
-    for (k = i; k < j; k++) {
-        juris = juris * 10 + num[k];
+    // Convert the array back to a number
+    long long result = 0;
+    for (long long i = 0; i < length; i++) {
+        result = result * 10 + num[i];
     }
 
-    return juris;
+    // Free the allocated memory
+    free(num);
+
+    return result;
 }
-
+    // print your number and it return next bigger
 int main() {
-    long long *n = (long long*) malloc(sizeof(long long));
-    printf("type a number that you want to check for next biggest number: ");
-    if (scanf("%lld", n) != 1 || *n < 0) {
-        return 1;
-    }
-
-    // Find the next bigger number and print the result
-    long long result = next_bigger_number(n);
-    if (result == -1) {
-        printf("-1\n");
-    } else {
-        printf("next biggest number: %lld\n", result);
-    }
-
+    long long number ;
+    scanf("%lld",&number);
+    long long nextNumber = next_bigger_number(number);
+    printf("Next bigger number: %lld\n", nextNumber);
     return 0;
 }
